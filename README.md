@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RepoLens 🔍✨
 
-## Getting Started
+**Instant intelligence on any GitHub repository using Gemini 2.0.**
 
-First, run the development server:
+RepoLens is a powerful, AI-driven GitHub repository analyzer that helps developers understand the health, structure, and contribution-friendliness of any public codebase instantly.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+![RepoLens Preview](https://via.placeholder.com/800x400?text=RepoLens+Dashboard)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **AI Repository Summary**: Powered by Google Gemini 2.0 Flash, get plain English explanations of what a repository does, its target audience, and suggested first issues.
+- **Maintenance Health Score**: Analyzes commit frequency, PR merge rates, and issue resolution to generate a dynamic 0-100 score.
+- **Contribution Friendliness**: Scans for standard files (`CONTRIBUTING.md`, `LICENSE`, `CODE_OF_CONDUCT`, PR Templates) to let you know how welcoming a codebase is.
+- **PR Intelligence**: Discover average merge times, external contributor PR merge rates, and a quick verdict on how open a repo is to outside help.
+- **Visual File Structure**: Instantly browse the core folder structure without leaving the dashboard.
+- **Dependency Snapshot**: Detects `package.json` or `requirements.txt` to estimate project complexity.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛠 Tech Stack
 
-## Learn More
+- **Frontend**: Next.js 14 App Router, React, Tailwind CSS, shadcn/ui, Framer Motion (via UI libs).
+- **Backend API**: Next.js Route Handlers.
+- **AI Integration**: `@google/generative-ai` SDK.
+- **Data Source**: GitHub REST API with advanced fetching heuristics.
 
-To learn more about Next.js, take a look at the following resources:
+## 💻 Local Setup
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/yourusername/repolens.git
+   cd repolens
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-## Deploy on Vercel
+3. **Environment Setup:**
+   Duplicate the `.env.example` file and rename it to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+   Fill in your tokens (see Environment Variables table below).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4. **Run the Development Server:**
+   ```bash
+   npm run dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🔑 Environment Variables
+
+| Variable | Description |
+|---|---|
+| `GITHUB_TOKEN` | A standard Personal Access Token (classic or fine-grained) required to bypass aggressive GitHub rate limits. |
+| `GEMINI_API_KEY` | Your Google API Key for accessing Gemini 2.0. Get it from [Google AI Studio](https://aistudio.google.com/). |
+| `NEXT_PUBLIC_APP_URL` | Used for fully-qualified API internal calls if necessary. Generally `http://localhost:3000` locally. |
+
+## 🚢 Deployment Guide (Vercel)
+
+RepoLens is optimized for edge and serverless environments, making Vercel the ideal host.
+
+1. Push your repository to GitHub.
+2. Go to [Vercel](https://vercel.com/) and Import your project.
+3. In the Settings tab before deploying, configure your **Environment Variables**:
+   - `GITHUB_TOKEN`
+   - `GEMINI_API_KEY`
+4. Click **Deploy**. Vercel will install dependencies, build the Next.js app, and map your API routes seamlessly.
+
+---
+
+*Built with passion, AI, and lots of coffee.*
