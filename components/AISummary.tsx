@@ -85,7 +85,7 @@ export function AISummary({ repoData }: Props) {
             ) : (
               <>
                 <Sparkles className="w-8 h-8 mb-3 text-blue-500/50 animate-pulse" />
-                <p className="animate-pulse">Generating insights with Gemini 2.0...</p>
+                <p className="animate-pulse">Generating insights...</p>
               </>
             )}
           </div>
