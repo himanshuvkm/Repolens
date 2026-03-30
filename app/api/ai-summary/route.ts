@@ -2,32 +2,31 @@ import { NextRequest } from "next/server";
 import { generateContentStream } from "@/lib/gemini";
 
 export async function POST(request: NextRequest) {
+  // ── 1. ENV CHECK ─────────────────────────────────────────────
+  if (!process.env.GEMINI_API_KEY) {
+    return json({ error: "GEMINI_API_KEY is not configured." }, 500);
+  }
+
+  // ── 2. PARSE BODY ────────────────────────────────────────────
+  let body: any;
   try {
-    // ✅ Guard: check API key early
-    if (!process.env.GEMINI_API_KEY) {
-      return new Response(
-        JSON.stringify({ error: "GEMINI_API_KEY is not configured" }),
-        { status: 500 }
-      );
-    }
+    body = await request.json();
+  } catch {
+    return json({ error: "Invalid JSON body." }, 400);
+  }
 
-    const body = await request.json();
-    const { repoDataJSON } = body;
+  const { repoDataJSON } = body ?? {};
+  if (!repoDataJSON) {
+    return json({ error: "repoDataJSON is required." }, 400);
+  }
 
-    if (!repoDataJSON) {
-      return new Response(
-        JSON.stringify({ error: "repoDataJSON is required" }),
-        { status: 400 }
-      );
-    }
+  const dataString =
+    typeof repoDataJSON === "string"
+      ? repoDataJSON
+      : JSON.stringify(repoDataJSON, null, 2);
 
-    // ✅ Guard: handle both string and object
-    const dataString =
-      typeof repoDataJSON === "string"
-        ? repoDataJSON
-        : JSON.stringify(repoDataJSON, null, 2);
-
-    const prompt = `You are a senior developer assistant analyzing a GitHub repository.
+  // ── 3. PROMPT ────────────────────────────────────────────────
+  const prompt = `You are a senior developer assistant analyzing a GitHub repository.
 
 Given the following repository data, provide a detailed analysis in this exact format:
 
@@ -55,42 +54,49 @@ Reasoning: [2-3 sentences explaining the verdict]
 Repository Data:
 ${dataString}`;
 
-    const result = await generateContentStream(prompt);
-    const encoder = new TextEncoder();
+  // ── 4. SAFE AI CALL ─────────────────────────────────────────
+  const result = await generateContentStream(prompt);
 
-    const stream = new ReadableStream({
-      async start(controller) {
-        try {
-          for await (const chunk of result.stream) {
-            const text = chunk.text();
-            if (text) {
-              controller.enqueue(encoder.encode(text));
-            }
+  // ── 5. STREAM RESPONSE ──────────────────────────────────────
+  const encoder = new TextEncoder();
+
+  const stream = new ReadableStream({
+    async start(controller) {
+      try {
+        for await (const chunk of result) {
+          const text = chunk.text;
+          if (text) {
+            controller.enqueue(encoder.encode(text));
           }
-        } catch (err) {
-          console.error("Stream error:", err);
-          controller.error(err);
-        } finally {
-          controller.close();
         }
-      },
-    });
+      } catch (err) {
+        console.error("[ai-summary] Stream error:", err);
 
-    return new Response(stream, {
-      headers: {
-        "Content-Type": "text/plain; charset=utf-8",
-        "Cache-Control": "no-cache, no-transform",
-        "Connection": "keep-alive",
-        // ✅ Removed Transfer-Encoding: chunked — Next.js handles this
-      },
-    });
-  } catch (error: any) {
-    console.error("API AI-Summary Error:", error);
-    return new Response(
-      JSON.stringify({
-        error: error.message || "Failed to generate AI summary",
-      }),
-      { status: 500 }
-    );
-  }
+        // 🔥 Never break stream
+        controller.enqueue(
+          encoder.encode("\n\n⚠️ Stream interrupted.")
+        );
+      } finally {
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(stream, {
+    status: 200,
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8",
+      "Cache-Control": "no-cache, no-transform",
+      Connection: "keep-alive",
+      "X-Accel-Buffering": "no",
+    },
+  });
+}
+
+// ── Helper ─────────────────────────────────────────────────────
+function json(data: object, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
 }
