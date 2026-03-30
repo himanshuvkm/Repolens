@@ -46,6 +46,55 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Stitch Custom Colors */
+  --color-tertiary-container: #89929c;
+  --color-on-tertiary-fixed-variant: #3f4850;
+  --color-inverse-surface: #dfe2eb;
+  --color-primary-fixed: #d7e2ff;
+  --color-error-container: #93000a;
+  --color-secondary-container: #41474f;
+  --color-surface-container-lowest: #0a0e14;
+  --color-on-secondary-fixed: #161c23;
+  --color-on-secondary-container: #b0b5be;
+  --color-primary: #acc7ff;
+  --color-surface-bright: #353940;
+  --color-tertiary-fixed-dim: #bec7d2;
+  --color-on-primary-fixed-variant: #004492;
+  --color-secondary: #c1c7d0;
+  --color-on-error-container: #ffdad6;
+  --color-on-surface: #dfe2eb;
+  --color-on-primary-container: #00285b;
+  --color-outline: #8c909e;
+  --color-primary-container: #508ff8;
+  --color-tertiary: #bec7d2;
+  --color-background: #10141a;
+  --color-on-primary-fixed: #001a40;
+  --color-surface-container-highest: #31353c;
+  --color-error: #ffb4ab;
+  --color-surface-container-low: #181c22;
+  --color-on-tertiary-container: #222b33;
+  --color-surface-variant: #31353c;
+  --color-inverse-primary: #005bbf;
+  --color-surface-container-high: #262a31;
+  --color-secondary-fixed-dim: #c1c7d0;
+  --color-secondary-fixed: #dde3ec;
+  --color-tertiary-fixed: #dae3ee;
+  --color-surface-tint: #acc7ff;
+  --color-primary-fixed-dim: #acc7ff;
+  --color-on-primary: #002f68;
+  --color-on-surface-variant: #c2c6d5;
+  --color-inverse-on-surface: #2d3137;
+  --color-on-secondary-fixed-variant: #41474f;
+  --color-surface-container: #1c2026;
+  --color-on-secondary: #2b3138;
+  --color-surface-dim: #10141a;
+  --color-on-tertiary: #29313a;
+  --color-on-background: #dfe2eb;
+  --color-on-error: #690005;
+  --color-on-tertiary-fixed: #141c24;
+  --color-surface: #10141a;
+  --color-outline-variant: #424753;
 }
 
 :root {
@@ -127,4 +176,15 @@
   html {
     @apply font-sans;
   }
+}
+
+/* Stitch Custom Utility Classes */
+.glass-effect {
+  backdrop-filter: blur(12px);
+  background: rgba(53, 57, 64, 0.4);
+}
+
+.noise-bg {
+  background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB_46b9_Kdslbf3h-VTL0j1qzCKINnxb0gddc15kfa1tBQM5QqioQUjbgAjfuRmy56i8x4ZFPeWWxJ6a40BtoHWg1EG6A23c4PJ5lKstNFSatVynewLWj05Tvid75K-IlXLsvsOn2Wn3CKqo7g65NDct-F7BDiyrrVmTwwKquJZmb4Y4duzS08AEb3wKeY8XBM-cTuSEcJB1QlgwpQL559JsEfaqqC80J8E4EvojCZSRRqVKs8igoed0xFiYdjwysbg98cKBzs2OIn5");
+  opacity: 0.03;
 }

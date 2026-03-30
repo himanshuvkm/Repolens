@@ -2,92 +2,123 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, ArrowRight } from "lucide-react";
+import { Search, ArrowRight, Loader2 } from "lucide-react";
 import { GithubIcon as Github } from "@/components/GithubIcon";
+
+const exampleRepos = ["vercel/next.js", "facebook/react", "shadcn-ui/ui"];
 
 export function RepoInput() {
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const navigate = (owner: string, repo: string) => {
+    setLoading(true);
+    router.push(`/report/${owner}/${repo}`);
+  };
 
   const handleAnalyze = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    if (!url.trim()) {
-      setError("Please enter a GitHub repository URL");
+    const trimmed = url.trim();
+    if (!trimmed) {
+      setError("Please enter a GitHub repository URL.");
       return;
     }
 
     try {
-      // Basic URL parsing to extract owner and repo
-      const parsedUrl = new URL(url.trim());
-      if (parsedUrl.hostname !== "github.com") {
-        throw new Error("Invalid GitHub Domain");
-      }
-      
-      const pathParts = parsedUrl.pathname.split("/").filter(Boolean);
-      if (pathParts.length < 2) {
-        throw new Error("Invalid repository format");
-      }
+      const parsedUrl = new URL(trimmed);
+      if (parsedUrl.hostname !== "github.com") throw new Error("Not github.com");
 
-      const owner = pathParts[0];
-      const repo = pathParts[1];
+      const parts = parsedUrl.pathname.split("/").filter(Boolean);
+      if (parts.length < 2) throw new Error("Missing owner/repo");
 
-      router.push(`/report/${owner}/${repo}`);
-    } catch (err) {
-      setError("Please enter a valid GitHub URL (e.g., https://github.com/vercel/next.js)");
+      navigate(parts[0], parts[1]);
+    } catch {
+      setError("Enter a valid GitHub URL — e.g. https://github.com/vercel/next.js");
     }
   };
 
   const handleChipClick = (exampleRepo: string) => {
     setUrl(`https://github.com/${exampleRepo}`);
     const [owner, repo] = exampleRepo.split("/");
-    router.push(`/report/${owner}/${repo}`);
-  }
-
-  const exampleRepos = ["vercel/next.js", "facebook/react", "shadcn-ui/ui"];
+    navigate(owner, repo);
+  };
 
   return (
-    <div className="w-full max-w-3xl mx-auto px-4">
-      <form onSubmit={handleAnalyze} className="relative group">
-        <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-        <div className="relative flex items-center bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-2xl">
-          <div className="pl-6 text-gray-400">
-            <Github className="w-6 h-6" />
+    <div className="w-full max-w-2xl mx-auto px-4">
+      <form onSubmit={handleAnalyze} id="analyzer" className="relative group scroll-mt-32">
+        {/* Glow */}
+        <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-primary-container/20 rounded-2xl blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+
+        <div className="relative flex flex-col sm:flex-row gap-2.5 p-2 bg-surface-container-low rounded-2xl ring-1 ring-white/[0.07] shadow-2xl">
+          {/* Input */}
+          <div className="flex flex-1 items-center px-4 gap-3 bg-surface-container-lowest rounded-xl min-w-0">
+            <Search className="w-4 h-4 text-outline shrink-0" />
+            <input
+              type="url"
+              value={url}
+              onChange={(e) => {
+                setUrl(e.target.value);
+                if (error) setError("");
+              }}
+              placeholder="https://github.com/facebook/react"
+              className="w-full py-3.5 bg-transparent border-none focus:ring-0 text-on-surface placeholder:text-on-surface-variant/40 text-sm outline-none min-w-0"
+              autoComplete="off"
+              spellCheck={false}
+            />
+            {url && (
+              <button
+                type="button"
+                onClick={() => setUrl("")}
+                className="shrink-0 text-on-surface-variant/40 hover:text-on-surface-variant text-sm font-medium transition-colors"
+                aria-label="Clear input"
+              >
+                ✕
+              </button>
+            )}
           </div>
-          <input
-            type="text"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://github.com/owner/repo"
-            className="w-full bg-transparent text-white px-6 py-5 text-lg outline-none placeholder:text-gray-500"
-          />
+
+          {/* Submit */}
           <button
             type="submit"
-            className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-5 font-semibold transition-colors flex items-center gap-2 m-1 rounded-xl"
+            disabled={loading}
+            className="flex items-center justify-center gap-2 bg-gradient-to-r from-primary-container to-primary text-on-primary-container px-7 py-3.5 rounded-xl font-bold text-sm transition-all active:scale-[0.97] shadow-lg shadow-primary/20 whitespace-nowrap disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            Analyze <ArrowRight className="w-5 h-5" />
+            {loading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <>
+                Analyze
+                <ArrowRight className="w-4 h-4" />
+              </>
+            )}
           </button>
         </div>
       </form>
-      
+
+      {/* Error */}
       {error && (
-        <p className="text-red-400 mt-3 text-center animate-in fade-in slide-in-from-top-2">
+        <p className="text-error mt-3 text-center text-xs font-medium animate-in fade-in slide-in-from-top-2">
           {error}
         </p>
       )}
 
-      <div className="mt-8 flex flex-col items-center">
-        <p className="text-sm text-gray-500 mb-4">Or try one of these examples:</p>
-        <div className="flex flex-wrap justify-center gap-3">
+      {/* Example chips */}
+      <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3 flex-wrap">
+        <span className="text-[10px] uppercase tracking-[0.2em] text-on-surface-variant/50">Try:</span>
+        <div className="flex flex-wrap justify-center gap-2">
           {exampleRepos.map((repo) => (
             <button
               key={repo}
+              type="button"
               onClick={() => handleChipClick(repo)}
-              className="px-4 py-2 rounded-full border border-gray-800 bg-gray-900/50 text-gray-300 hover:text-white hover:border-blue-500/50 hover:bg-blue-500/10 transition-all text-sm flex items-center gap-2"
+              disabled={loading}
+              className="px-3.5 py-1.5 rounded-full bg-surface-container-low border border-outline-variant/10 text-xs font-medium text-on-surface-variant hover:bg-surface-container-high hover:text-primary hover:border-primary/20 transition-all flex items-center gap-1.5 disabled:opacity-50"
             >
-              <Github className="w-4 h-4" />
+              <Github className="w-3.5 h-3.5" />
               {repo}
             </button>
           ))}

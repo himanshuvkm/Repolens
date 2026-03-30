@@ -1,85 +1,83 @@
+// ─────────────────────────────────────────────
+// MaintenanceScore.tsx
+// ─────────────────────────────────────────────
 "use client";
-
+ 
 import { useEffect, useState } from "react";
-import { Activity, ShieldCheck, AlertTriangle } from "lucide-react";
-
-interface Props {
+import { Wand2 } from "lucide-react";
+ 
+interface MaintenanceScoreProps {
   score: number;
 }
-
-export function MaintenanceScore({ score }: Props) {
-  const [currentScore, setCurrentScore] = useState(0);
-
+ 
+export function MaintenanceScore({ score }: MaintenanceScoreProps) {
+  const [displayScore, setDisplayScore] = useState(0);
+ 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setCurrentScore(score);
-    }, 300);
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => setDisplayScore(score), 300);
+    return () => clearTimeout(t);
   }, [score]);
-
-  // Determine color and status
-  let colorClass = "text-green-500";
-  let bgClass = "bg-green-500/10 border-green-500/20";
-  let statusText = "Excellent";
-  let Icon = ShieldCheck;
-
-  if (score < 50) {
-    colorClass = "text-red-500";
-    bgClass = "bg-red-500/10 border-red-500/20";
-    statusText = "Poorly Maintained";
-    Icon = AlertTriangle;
-  } else if (score < 80) {
-    colorClass = "text-yellow-500";
-    bgClass = "bg-yellow-500/10 border-yellow-500/20";
-    statusText = "Needs Attention";
-    Icon = Activity;
-  }
-
-  // SVG Circular progress
-  const radius = 40;
+ 
+  const statusTitle =
+    score >= 80 ? "Excellent" : score >= 50 ? "Needs Attention" : "Poorly Maintained";
+  const statusDesc =
+    score >= 80
+      ? "Frequent commits and high PR resolution rate."
+      : score >= 50
+      ? "Maintenance is stalling, but still active."
+      : "Inactive — mounting unresolved issues.";
+ 
+  const radius = 34;
   const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (currentScore / 100) * circumference;
-
+  const offset = circumference - (displayScore / 100) * circumference;
+ 
+  const scoreColor =
+    score >= 80 ? "text-green-400" : score >= 50 ? "text-yellow-400" : "text-red-400";
+  const trackColor =
+    score >= 80 ? "#4ade80" : score >= 50 ? "#facc15" : "#f87171";
+ 
   return (
-    <div className={`p-6 rounded-2xl border ${bgClass} flex flex-col items-center justify-center text-center relative overflow-hidden h-full group`}>
-      <div className="absolute top-4 left-4">
-        <Icon className={`w-5 h-5 ${colorClass} opacity-60`} />
+    <div className="glass p-6 rounded-2xl border border-outline-variant/5 flex flex-col h-full relative overflow-hidden group">
+      <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/5 rounded-full blur-3xl transition-all group-hover:bg-primary/10 pointer-events-none"></div>
+ 
+      <div className="flex justify-between items-start mb-5 relative z-10">
+        <h3 className="text-[10px] font-black tracking-[0.2em] uppercase text-on-surface-variant">
+          Maintenance Score
+        </h3>
+        <Wand2 className="w-4 h-4 text-primary" />
       </div>
-      <h3 className="text-gray-400 font-medium text-sm mt-3 mb-6 uppercase tracking-wider">Maintenance Health</h3>
-      
-      <div className="relative flex items-center justify-center w-32 h-32 mb-4 group-hover:scale-105 transition-transform duration-500">
-        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-          <circle
-            className="text-gray-800"
-            strokeWidth="8"
-            stroke="currentColor"
-            fill="transparent"
-            r={radius}
-            cx="50"
-            cy="50"
-          />
-          <circle
-            className={`${colorClass} transition-all duration-1500 ease-out`}
-            strokeWidth="8"
-            strokeDasharray={circumference}
-            strokeDashoffset={strokeDashoffset}
-            strokeLinecap="round"
-            stroke="currentColor"
-            fill="transparent"
-            r={radius}
-            cx="50"
-            cy="50"
-          />
-        </svg>
-        <div className="absolute flex flex-col items-center justify-center">
-          <span className={`text-4xl font-bold tracking-tighter ${colorClass}`}>
-            {currentScore}
-          </span>
-          <span className="text-[10px] text-gray-500 font-medium">/ 100</span>
+ 
+      <div className="flex items-center gap-5 relative z-10">
+        {/* Ring */}
+        <div className="relative w-[80px] h-[80px] shrink-0">
+          <svg className="w-full h-full -rotate-90" viewBox="0 0 80 80">
+            <circle
+              cx="40" cy="40" r={radius} fill="transparent"
+              stroke="currentColor" strokeWidth="6"
+              className="text-surface-container-highest"
+            />
+            <circle
+              cx="40" cy="40" r={radius} fill="transparent"
+              stroke={trackColor} strokeWidth="6"
+              strokeLinecap="round"
+              strokeDasharray={circumference}
+              strokeDashoffset={offset}
+              style={{ transition: "stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1)" }}
+            />
+          </svg>
+          <div className={`absolute inset-0 flex items-center justify-center text-lg font-black ${scoreColor}`}>
+            {displayScore}
+          </div>
+        </div>
+ 
+        <div className="min-w-0">
+          <p className={`text-xs font-bold uppercase tracking-widest mb-1 ${scoreColor}`}>
+            {statusTitle}
+          </p>
+          <p className="text-[11px] text-on-surface-variant leading-snug">{statusDesc}</p>
         </div>
       </div>
-      
-      <p className={`font-semibold ${colorClass} text-lg`}>{statusText}</p>
     </div>
   );
 }
+ 

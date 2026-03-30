@@ -1,70 +1,76 @@
-import { GitMerge, Clock, AlertCircle } from "lucide-react";
-
-interface Props {
+// ─────────────────────────────────────────────
+// PRIntelligence.tsx
+// ─────────────────────────────────────────────
+import { Verified, Rocket, TrendingUp, Clock } from "lucide-react";
+ 
+interface PRIntelligenceProps {
   verdict: string;
   mergeRate: number;
   avgMergeTimeDays: number;
   avgFirstReviewTimeDays: number;
 }
-
+ 
 export function PRIntelligence({
   verdict,
   mergeRate,
   avgMergeTimeDays,
   avgFirstReviewTimeDays,
-}: Props) {
-
-  let badgeColor = "bg-blue-500/20 text-blue-400 border-blue-500/30";
-  if (verdict === "Abandoned") badgeColor = "bg-red-500/20 text-red-400 border-red-500/30";
-  else if (verdict === "Great for contributions") badgeColor = "bg-green-500/20 text-green-400 border-green-500/30";
-  else if (verdict === "Maintainer-only") badgeColor = "bg-gray-800 text-gray-400 border-gray-700";
-
+}: PRIntelligenceProps) {
+  const formattedMergeRate = (mergeRate * 100).toFixed(0);
+  const formattedMergeTime =
+    avgMergeTimeDays === 0
+      ? "N/A"
+      : avgMergeTimeDays < 1
+      ? "< 24h"
+      : `${avgMergeTimeDays.toFixed(1)}d`;
+ 
+  const verdictMap: Record<string, string> = {
+    Abandoned: "High Risk",
+    "Great for contributions": "Welcoming",
+    "Maintainer-only": "Closed",
+  };
+  const verdictShort = verdictMap[verdict] ?? "Optimized";
+ 
+  const verdictColor =
+    verdictShort === "High Risk"
+      ? "text-red-400 bg-red-500/10 border-red-500/20"
+      : verdictShort === "Welcoming"
+      ? "text-green-400 bg-green-500/10 border-green-500/20"
+      : "text-primary bg-primary/10 border-primary/20";
+ 
   return (
-    <div className="flex flex-col h-full bg-gray-900 border border-gray-800 rounded-2xl p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-gray-300 font-medium flex items-center gap-2">
-          <GitMerge className="w-5 h-5 text-indigo-400" /> Pull Request Intelligence
+    <div className="glass p-6 rounded-2xl border border-outline-variant/5 bg-gradient-to-br from-primary/8 to-transparent flex flex-col justify-between h-full relative">
+      <div className="flex justify-between items-start mb-5">
+        <h3 className="text-[10px] font-black tracking-[0.2em] uppercase text-on-surface-variant">
+          PR Intelligence
         </h3>
-        <div className={`px-3 py-1 rounded-full text-xs font-semibold border ${badgeColor} uppercase tracking-wide`}>
-          {verdict}
-        </div>
+        <Verified className="w-4 h-4 text-primary shrink-0" />
       </div>
-
-      <div className="grid grid-cols-2 gap-4 flex-grow">
-        <div className="bg-gray-950 rounded-xl p-4 flex flex-col justify-center border border-gray-800/50">
-          <p className="text-gray-500 text-xs font-medium uppercase mb-1 flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5" /> Avg Merge Time
-          </p>
-          <p className="text-2xl font-bold text-gray-100">
-            {avgMergeTimeDays === 0 ? "N/A" : avgMergeTimeDays < 1 ? "< 24h" : `${avgMergeTimeDays.toFixed(1)} days`}
-          </p>
-        </div>
-
-        <div className="bg-gray-950 rounded-xl p-4 flex flex-col justify-center border border-gray-800/50">
-          <p className="text-gray-500 text-xs font-medium uppercase mb-1 flex items-center gap-1.5">
-            <AlertCircle className="w-3.5 h-3.5" /> First Review
-          </p>
-          <p className="text-2xl font-bold text-gray-100">
-            {avgFirstReviewTimeDays === 0 ? "N/A" : avgFirstReviewTimeDays < 1 ? "< 24h" : `${avgFirstReviewTimeDays.toFixed(1)} days`}
-          </p>
-        </div>
-
-        <div className="col-span-2 bg-gray-950 rounded-xl p-4 flex flex-col justify-center border border-gray-800/50">
-          <div className="flex justify-between items-end mb-2">
-            <p className="text-gray-500 text-xs font-medium uppercase flex items-center gap-1.5">
-              <GitMerge className="w-3.5 h-3.5" /> PR Merge Rate
-            </p>
-            <span className="text-xl font-bold text-gray-200">{(mergeRate * 100).toFixed(0)}%</span>
+ 
+      {/* Verdict badge */}
+      <div className={`self-start inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[11px] font-bold mb-5 ${verdictColor}`}>
+        <Rocket className="w-3.5 h-3.5" />
+        {verdictShort}
+      </div>
+ 
+      {/* Stats row */}
+      <div className="grid grid-cols-2 gap-3 mt-auto">
+        <div className="bg-surface-container-highest/60 rounded-xl p-3">
+          <div className="flex items-center gap-1 text-on-surface-variant mb-1">
+            <TrendingUp className="w-3 h-3" />
+            <span className="text-[10px] uppercase tracking-wider font-semibold">Merge rate</span>
           </div>
-
-          <div className="h-2 w-full bg-gray-800 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-indigo-500 rounded-full transition-all duration-1000"
-              style={{ width: `${mergeRate * 100}%` }}
-            />
+          <span className="text-xl font-black text-on-surface">{formattedMergeRate}%</span>
+        </div>
+        <div className="bg-surface-container-highest/60 rounded-xl p-3">
+          <div className="flex items-center gap-1 text-on-surface-variant mb-1">
+            <Clock className="w-3 h-3" />
+            <span className="text-[10px] uppercase tracking-wider font-semibold">Avg time</span>
           </div>
+          <span className="text-xl font-black text-on-surface">{formattedMergeTime}</span>
         </div>
       </div>
     </div>
   );
 }
+ 

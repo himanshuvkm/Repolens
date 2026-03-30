@@ -1,17 +1,28 @@
 import { LandingHero } from "@/components/LandingHero";
 import { RepoInput } from "@/components/RepoInput";
+import { BentoFeatures } from "@/components/BentoFeatures";
+import { FeatureSpotlight } from "@/components/FeatureSpotlight";
+import Footer from "@/components/footer";
 
 export default function Home() {
   return (
-    <div className="container mx-auto px-4 py-12 md:py-24 flex flex-col items-center">
-      <LandingHero />
-      <div className="w-full mt-4 flex justify-center">
-        <RepoInput />
+    <>
+      {/* Background Decoration */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary-container/5 blur-[100px] rounded-full"></div>
+        <div className="absolute inset-0 noise-bg"></div>
       </div>
       
-      {/* Decorative background elements */}
-      <div className="fixed top-20 left-10 w-64 h-64 bg-blue-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 pointer-events-none"></div>
-      <div className="fixed bottom-20 right-10 w-64 h-64 bg-indigo-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 pointer-events-none"></div>
-    </div>
+      <div className="relative z-10 w-full pb-20">
+        <LandingHero />
+        <div className="w-full flex justify-center relative mt-4">
+          <RepoInput />
+        </div>
+        <BentoFeatures />
+        <FeatureSpotlight />
+      </div>
+        <Footer />
+    </>
   );
 }

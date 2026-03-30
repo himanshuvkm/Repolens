@@ -19,30 +19,30 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={cn("dark", "font-sans", geist.variable)}>
-      <body className={`${inter.className} bg-gray-950 text-slate-50 min-h-screen selection:bg-blue-500/30 selection:text-blue-200`}>
-        <div className="flex flex-col min-h-screen">
-          <header className="border-b border-gray-800 bg-gray-950/80 backdrop-blur-md sticky top-0 z-50">
-            <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-              <a href="/" className="flex items-center gap-2 text-xl font-bold font-mono tracking-tight text-white hover:text-blue-400 transition-colors">
-                <span className="bg-blue-600 text-white w-8 h-8 flex items-center justify-center rounded-lg shadow-lg shadow-blue-500/20">
-                  R
-                </span>
+      <body className={`${inter.className} text-on-surface bg-surface selection:bg-primary-container selection:text-on-primary-container overflow-x-hidden min-h-screen flex flex-col`}>
+        <nav className="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl shadow-2xl shadow-black/40 border-b border-outline-variant/5">
+          <div className="flex justify-between items-center w-full px-6 py-3 max-w-[1440px] mx-auto">
+            <div className="flex items-center gap-8">
+              <a href="/" className="text-xl font-black tracking-tighter text-white bg-gradient-to-r from-primary-container to-primary bg-clip-text text-transparent">
                 RepoLens
               </a>
-              <a href="https://github.com/yourusername/repolens" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-400 hover:text-white transition-colors">
-                Star on GitHub
+              <div className="hidden md:flex gap-6 tracking-tight font-medium text-sm">
+                <a className="text-on-surface-variant hover:text-white transition-colors" href="#">Docs</a>
+                <a className="text-on-surface-variant hover:text-white transition-colors" href="#">Pricing</a>
+                <a className="text-on-surface-variant hover:text-white transition-colors" href="#">Blog</a>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <a href="#analyzer" className="bg-primary-container hover:bg-[#508ff8] text-on-primary-container px-5 py-2 rounded-xl text-sm font-bold transition-all duration-200 active:scale-95 inline-block text-center">
+                Analyze Repo
               </a>
             </div>
-          </header>
-          <main className="flex-grow">
-            {children}
-          </main>
-          <footer className="border-t border-gray-800 py-8 px-4 mt-auto">
-            <div className="container mx-auto text-center text-gray-500 text-sm">
-              <p>Built with Next.js, Tailwind CSS, and Gemini 2.0 API.</p>
-            </div>
-          </footer>
-        </div>
+          </div>
+        </nav>
+        
+        <main className="flex-grow pt-24 mb-0">
+          {children}
+        </main>   
       </body>
     </html>
   );

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { Sparkles, RefreshCw, AlertCircle } from "lucide-react";
+import { Sparkles, RefreshCw, AlertCircle, Brain } from "lucide-react";
 
 interface Props {
   repoData: any;
@@ -52,31 +52,36 @@ export function AISummary({ repoData }: Props) {
   }, [repoData]);
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col h-full">
-      <div className="bg-gradient-to-r from-blue-900/40 to-indigo-900/40 p-4 border-b border-gray-800 flex items-center justify-between">
-        <h3 className="text-white font-semibold flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-blue-400" /> AI Repository Analysis
-        </h3>
+    <section className="glass rounded-2xl p-6 lg:p-8 border border-outline-variant/5 flex flex-col h-1/2">
+      <div className="flex items-center gap-3 mb-6 border-b border-outline-variant/10 pb-6 relative">
+        <div className="bg-primary/20 p-2 rounded-lg text-primary">
+          <Brain className="shrink-0 w-6 h-6 overflow-hidden self-start" />
+        </div>
+        <div>
+          <h2 className="text-sm font-black uppercase tracking-[0.2em] text-on-surface">AI Strategic Summary</h2>
+          <p className="text-xs text-on-surface-variant">Gemini 2.0 Architectural Synthesis</p>
+        </div>
+        
         {error && (
           <button 
             onClick={fetchSummary}
-            className="text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-800 hover:bg-gray-700 text-gray-300 transition-colors"
+            className="absolute top-0 right-0 text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-highest hover:bg-surface-container-high transition-colors text-primary font-bold"
           >
             <RefreshCw className="w-3.5 h-3.5" /> Retry
           </button>
         )}
       </div>
       
-      <div className="p-6 overflow-y-auto custom-scrollbar flex-grow prose prose-invert prose-blue max-w-none">
+      <div className="overflow-y-auto custom-scrollbar flex-grow prose prose-sm prose-invert max-w-none text-on-surface-variant leading-relaxed">
         {summary ? (
-          <div className="markdown-body text-gray-300 text-sm leading-relaxed">
+          <div>
             <ReactMarkdown>{summary}</ReactMarkdown>
             {loading && (
-              <span className="inline-block w-2 h-4 bg-blue-500 animate-pulse ml-1 align-middle" />
+              <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-1 align-middle" />
             )}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center h-48 text-gray-500">
+          <div className="flex flex-col items-center justify-center h-48 text-on-surface-variant/50">
             {error ? (
               <>
                 <AlertCircle className="w-8 h-8 mb-3 text-red-500/50" />
@@ -84,13 +89,13 @@ export function AISummary({ repoData }: Props) {
               </>
             ) : (
               <>
-                <Sparkles className="w-8 h-8 mb-3 text-blue-500/50 animate-pulse" />
+                <Sparkles className="w-8 h-8 mb-3 text-primary/50 animate-pulse" />
                 <p className="animate-pulse">Generating insights...</p>
               </>
             )}
           </div>
         )}
       </div>
-    </div>
+    </section>
   );
 }
