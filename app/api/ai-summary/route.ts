@@ -26,30 +26,47 @@ export async function POST(request: NextRequest) {
       : JSON.stringify(repoDataJSON, null, 2);
 
   // ── 3. PROMPT ────────────────────────────────────────────────
-  const prompt = `You are a senior developer assistant analyzing a GitHub repository.
+  const prompt = `You are an expert software architect and open-source analyst. Analyze the GitHub repository data below and return a structured JSON response. Be concise but insightful.
 
-Given the following repository data, provide a detailed analysis in this exact format:
+Return ONLY valid JSON matching this exact schema (no markdown fences, no extra text):
 
-## What This Repo Does
-[2-3 sentence plain English description]
-
-## Who It's Built For
-[Target audience and use cases]
-
-## Tech Stack Detected
-[List the detected languages, frameworks, tools]
-
-## Production Readiness
-[Is it stable, experimental, or abandoned? Why?]
-
-## Should I Contribute?
-Verdict: YES / MAYBE / NO
-Reasoning: [2-3 sentences explaining the verdict]
-
-## Suggested First Issues
-1. [Issue title or suggestion]
-2. [Issue title or suggestion]
-3. [Issue title or suggestion]
+{
+  "overview": {
+    "title": "string — repo name or inferred title (≤ 60 chars)",
+    "tagline": "string — one-line punchy description (≤ 120 chars)",
+    "description": "string — 2–3 sentences covering what it does and why it matters"
+  },
+  "audience": {
+    "primary": "string — primary target user (e.g. 'Backend engineers building REST APIs')",
+    "useCases": ["string", "string", "string"]
+  },
+  "techStack": {
+    "languages": ["string"],
+    "frameworks": ["string"],
+    "tooling": ["string"],
+    "highlights": "string — 1 sentence about the most interesting tech choices"
+  },
+  "health": {
+    "status": "active" | "experimental" | "stale" | "archived",
+    "statusReason": "string — 1-2 sentences explaining the status verdict",
+    "activityScore": number between 1–10,
+    "activityNote": "string — brief note on commit/PR/issue frequency",
+    "hasTests": boolean,
+    "hasDocs": boolean,
+    "hasCI": boolean
+  },
+  "contribution": {
+    "verdict": "YES" | "MAYBE" | "NO",
+    "reasoning": "string — 2–3 sentences",
+    "entryPoints": [
+      { "label": "string — short title", "detail": "string — 1 sentence" },
+      { "label": "string", "detail": "string" },
+      { "label": "string", "detail": "string" }
+    ]
+  },
+  "risks": ["string — 1 risk per item, max 3 items"],
+  "tldr": "string — 1 bold sentence summary of the whole repo in plain English"
+}
 
 Repository Data:
 ${dataString}`;
@@ -71,11 +88,7 @@ ${dataString}`;
         }
       } catch (err) {
         console.error("[ai-summary] Stream error:", err);
-
-        // 🔥 Never break stream
-        controller.enqueue(
-          encoder.encode("\n\n⚠️ Stream interrupted.")
-        );
+        controller.enqueue(encoder.encode("\n\n__STREAM_ERROR__"));
       } finally {
         controller.close();
       }
