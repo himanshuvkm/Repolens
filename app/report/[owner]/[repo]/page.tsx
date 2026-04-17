@@ -2,15 +2,13 @@
 
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
-import { ArrowLeft, Star, GitFork, Eye, ExternalLink, History } from "lucide-react";
-import { GithubIcon as Github } from "@/components/GithubIcon";
+import { ArrowLeft, Star, GitFork, ExternalLink, History, Sparkles, ShieldCheck, Compass } from "lucide-react";
 import { RepoAnalysisData } from "@/types";
-import { 
-  calculateMaintenanceScore, 
-  calculateContributionScore, 
-  calculatePRIntelligence 
+import {
+  calculateMaintenanceScore,
+  calculateContributionScore,
+  calculatePRIntelligence,
 } from "@/lib/scoring";
-
 import { MaintenanceScore } from "@/components/MaintenanceScore";
 import { ContributionScore } from "@/components/ContributionScore";
 import { PRIntelligence } from "@/components/PRIntelligence";
@@ -22,7 +20,6 @@ import { ReportLoading } from "@/components/ReportLoading";
 import { ReportSidebar } from "@/components/ReportSidebar";
 
 export default function ReportPage({ params }: { params: Promise<{ owner: string; repo: string }> }) {
-  // Use React.use to unfold params Promise (Next.js 15+ convention for dynamic params on client)
   const resolvedParams = use(params);
   const { owner, repo } = resolvedParams;
 
@@ -30,14 +27,6 @@ export default function ReportPage({ params }: { params: Promise<{ owner: string
   const [loadingStep, setLoadingStep] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("overall");
-
-  const steps = [
-    "Preparing analysis engine...",
-    "Fetching repository metadata...",
-    "Analyzing commit history and PRs...",
-    "Scanning file structure...",
-    "Finalizing metrics..."
-  ];
 
   useEffect(() => {
     let isMounted = true;
@@ -47,31 +36,31 @@ export default function ReportPage({ params }: { params: Promise<{ owner: string
       try {
         setLoadingStep(1);
         stepInterval = setInterval(() => {
-          setLoadingStep(prev => (prev < 4 ? prev + 1 : prev));
+          setLoadingStep((prev) => (prev < 4 ? prev + 1 : prev));
         }, 1500);
 
         const res = await fetch(`/api/analyze?owner=${owner}&repo=${repo}`);
         if (!res.ok) {
-          const errData = await res.json();
+          const errData = (await res.json()) as { error?: string };
           throw new Error(errData.error || "Failed to fetch repository data");
         }
-        
-        const json = await res.json();
-        
+
+        const json = (await res.json()) as RepoAnalysisData;
+
         if (isMounted) {
           clearInterval(stepInterval);
           setLoadingStep(5);
           setTimeout(() => setData(json), 500);
         }
-      } catch (err: any) {
+      } catch (err) {
         if (isMounted) {
           clearInterval(stepInterval);
-          setError(err.message || "An unexpected error occurred");
+          setError(err instanceof Error ? err.message : "An unexpected error occurred");
         }
       }
     };
 
-    fetchData();
+    void fetchData();
 
     return () => {
       isMounted = false;
@@ -81,16 +70,16 @@ export default function ReportPage({ params }: { params: Promise<{ owner: string
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-20 flex flex-col items-center justify-center text-center">
-        <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mb-6 text-red-400">
-          <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div className="container mx-auto flex flex-col items-center justify-center px-4 py-20 text-center">
+        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-500/10 text-red-400">
+          <svg className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
         </div>
-        <h2 className="text-3xl font-bold mb-4">Analysis Failed</h2>
-        <p className="text-gray-400 max-w-md mb-8">{error}</p>
-        <Link href="/" className="px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg font-medium transition-colors inline-flex items-center gap-2">
-          <ArrowLeft className="w-4 h-4" /> Try another repository
+        <h2 className="mb-4 font-display text-4xl text-ink">Analysis Failed</h2>
+        <p className="mb-8 max-w-md text-muted">{error}</p>
+        <Link href="/" className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 font-medium text-paper transition-colors hover:bg-[#11140e]">
+          <ArrowLeft className="h-4 w-4" /> Try another repository
         </Link>
       </div>
     );
@@ -100,105 +89,160 @@ export default function ReportPage({ params }: { params: Promise<{ owner: string
     return <ReportLoading owner={owner} repo={repo} step={loadingStep} />;
   }
 
-  const { metadata, commits, issues, fileTree, languages } = data;
+  const { metadata, commits, fileTree, languages } = data;
   const maintScore = calculateMaintenanceScore(data);
   const contScore = calculateContributionScore(data);
   const prIntel = calculatePRIntelligence(data);
+  const repoHealthLabel = maintScore >= 80 ? "Robust" : maintScore >= 55 ? "Steady" : "Fragile";
 
   return (
     <div className="flex w-full">
       <ReportSidebar activeTab={activeTab} onTabChange={setActiveTab} />
-      <div className="flex-1 md:ml-64 p-6 lg:p-10 max-w-7xl mx-auto w-full animate-in fade-in zoom-in-95 duration-500">
-        <header className="mb-10 space-y-6">
-          <Link href="/" className="inline-flex items-center gap-2 text-sm text-on-surface-variant hover:text-white mb-2 transition-colors">
-            <ArrowLeft className="w-4 h-4" /> Back to search
+      <div className="mx-auto w-full max-w-7xl flex-1 animate-in fade-in zoom-in-95 p-5 duration-500 md:ml-64 lg:p-10">
+        <header className="panel-card mb-10 space-y-8 rounded-[2.4rem] p-7 md:p-10">
+          <Link href="/" className="inline-flex items-center gap-2 text-sm text-muted transition-colors hover:text-ink">
+            <ArrowLeft className="h-4 w-4" /> Back to search
           </Link>
 
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
             <div className="space-y-2">
-              <div className="flex items-center gap-3">
-                <h1 className="text-4xl font-black tracking-tight text-on-surface">
-                  {owner}<span className="text-primary-container font-light">/</span>{repo}
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="rounded-full border border-frame bg-canvas px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted">
+                  Repository Dossier
+                </span>
+                <span className="rounded-full bg-accent px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-accent-foreground">
+                  {repoHealthLabel}
+                </span>
+              </div>
+              <div className="mt-3 flex items-center gap-3">
+                <h1 className="font-display text-5xl tracking-[-0.05em] text-ink md:text-7xl">
+                  {owner}
+                  <span className="font-light text-accent">/</span>
+                  {repo}
                 </h1>
-                <span className="bg-surface-variant px-3 py-1 rounded-full text-[10px] font-bold tracking-widest text-primary uppercase border border-outline-variant/20">
+                <span className="rounded-full border border-frame bg-panel px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-muted">
                   Public
                 </span>
               </div>
-              <p className="text-on-surface-variant max-w-2xl text-lg leading-relaxed font-light">
-                {metadata.description || "No description provided. Repository analysis automatically generated via Gemini 2.0 AI."}
+              <p className="max-w-2xl text-lg leading-relaxed text-muted">
+                {metadata.description || "No description provided. Repository analysis is assembled from live GitHub metadata and RepoLens scoring logic."}
               </p>
             </div>
-            
-            <div className="flex flex-wrap gap-4 text-sm mt-4 md:mt-0">
-              <div className="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-xl text-primary font-bold">
-                <Star className="w-5 h-5" /> {metadata.stars.toLocaleString()}
-              </div>
-              <div className="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-xl text-primary font-bold">
-                <GitFork className="w-5 h-5" /> {metadata.forks.toLocaleString()}
-              </div>
-              {metadata.license && (
-                <div className="flex items-center gap-2 flex-wrap bg-surface-container-low px-4 py-2 rounded-xl border border-outline-variant/10 text-on-surface-variant font-medium text-xs font-mono">
-                  ⚖️ {metadata.license}
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-[1.6rem] border border-frame bg-canvas p-5">
+                <p className="text-[10px] uppercase tracking-[0.22em] text-muted">Repository pulse</p>
+                <div className="mt-4 flex items-end gap-2">
+                  <span className="font-display text-5xl text-ink">{maintScore}</span>
+                  <span className="pb-2 text-sm text-muted">/100</span>
                 </div>
-              )}
+                <p className="mt-3 text-sm leading-7 text-muted">{prIntel.verdict}</p>
+              </div>
+              <div className="rounded-[1.6rem] border border-frame bg-ink p-5 text-paper">
+                <p className="text-[10px] uppercase tracking-[0.22em] text-paper/60">Key stats</p>
+                <div className="mt-4 flex flex-wrap gap-3 text-sm">
+                  <div className="flex items-center gap-2 rounded-full bg-paper/10 px-3 py-2">
+                    <Star className="h-4 w-4" /> {metadata.stars.toLocaleString()}
+                  </div>
+                  <div className="flex items-center gap-2 rounded-full bg-paper/10 px-3 py-2">
+                    <GitFork className="h-4 w-4" /> {metadata.forks.toLocaleString()}
+                  </div>
+                </div>
+                {metadata.license && <p className="mt-4 text-sm text-paper/70">{metadata.license}</p>}
+              </div>
             </div>
           </div>
-          
-          <div className="flex flex-wrap items-center gap-3 border-t border-outline-variant/10 pt-6">
-            <span className="text-[10px] text-on-surface-variant uppercase tracking-widest font-black mr-2">Core Tech:</span>
-            {languages && Object.entries(languages).slice(0, 3).map(([name]) => (
-              <span key={name} className="px-3 py-1 bg-surface-container-highest rounded-full text-xs font-bold tracking-tight text-primary">
-                {name}
-              </span>
-            ))}
-            <a href={`https://github.com/${owner}/${repo}`} target="_blank" rel="noopener noreferrer" className="ml-auto flex items-center gap-2 text-xs text-on-surface-variant hover:text-white transition-colors">
-              <ExternalLink className="w-3.5 h-3.5" /> View on GitHub
+
+          <div className="grid gap-4 border-t border-frame pt-7 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
+            <div className="rounded-[1.4rem] border border-frame bg-panel p-4">
+              <div className="mb-2 flex items-center gap-2 text-muted">
+                <ShieldCheck className="h-4 w-4 text-accent" />
+                <span className="text-[10px] uppercase tracking-[0.2em]">Health Summary</span>
+              </div>
+              <p className="text-sm leading-7 text-ink">
+                {maintScore >= 80
+                  ? "Active stewardship and strong merge hygiene."
+                  : maintScore >= 55
+                    ? "Usable project with some response friction."
+                    : "Needs care before depending on it heavily."}
+              </p>
+            </div>
+            <div className="rounded-[1.4rem] border border-frame bg-panel p-4">
+              <div className="mb-2 flex items-center gap-2 text-muted">
+                <Compass className="h-4 w-4 text-teal" />
+                <span className="text-[10px] uppercase tracking-[0.2em]">Core Tech</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {languages &&
+                  Object.entries(languages)
+                    .slice(0, 3)
+                    .map(([name]) => (
+                      <span key={name} className="rounded-full bg-canvas px-3 py-1 text-xs font-semibold text-ink">
+                        {name}
+                      </span>
+                    ))}
+              </div>
+            </div>
+            <div className="rounded-[1.4rem] border border-frame bg-panel p-4">
+              <div className="mb-2 flex items-center gap-2 text-muted">
+                <Sparkles className="h-4 w-4 text-accent" />
+                <span className="text-[10px] uppercase tracking-[0.2em]">Contribution Ease</span>
+              </div>
+              <p className="font-display text-4xl text-ink">{contScore}</p>
+            </div>
+            <a
+              href={`https://github.com/${owner}/${repo}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-[1.4rem] border border-frame bg-panel p-4 transition hover:-translate-y-0.5 hover:bg-canvas"
+            >
+              <div className="mb-2 flex items-center gap-2 text-muted">
+                <ExternalLink className="h-4 w-4 text-ink" />
+                <span className="text-[10px] uppercase tracking-[0.2em]">Source</span>
+              </div>
+              <p className="text-sm leading-7 text-ink">Open the repository on GitHub</p>
             </a>
           </div>
         </header>
 
-        {/* Dynamic Content Based on activeTab */}
         {activeTab === "overall" && (
           <>
-            {/* Score Cards Row */}
-            <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <section className="mb-10 grid grid-cols-1 gap-6 md:grid-cols-3">
               <MaintenanceScore score={maintScore} />
               <ContributionScore score={contScore} />
               <PRIntelligence {...prIntel} />
             </section>
 
-            {/* Main Layout Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-              {/* LEFT COLUMN */}
-              <div className="lg:col-span-4 space-y-8">
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+              <div className="space-y-8 lg:col-span-4">
                 <FileStructureTree tree={fileTree} />
 
-                {/* Activity Timeline */}
-                <section className="bg-surface-container-low rounded-2xl p-6 border border-white/5">
-                  <h2 className="text-xs font-black uppercase tracking-[0.2em] text-on-surface-variant flex items-center gap-2 mb-6">
-                    <History className="text-primary w-5 h-5" />
+                <section className="panel-card rounded-[1.9rem] p-6">
+                  <h2 className="mb-6 flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-muted">
+                    <History className="h-5 w-5 text-accent" />
                     Recent Activity
                   </h2>
-                  <div className="space-y-6 relative">
-                    <div className="absolute left-[9px] top-2 bottom-2 w-[2px] bg-surface-container-highest"></div>
+                  <div className="relative space-y-6">
+                    <div className="absolute bottom-2 left-[9px] top-2 w-[2px] bg-frame"></div>
                     {commits.slice(0, 5).map((commit, i) => (
                       <div key={commit.sha} className="relative pl-8">
-                        <div className={`absolute left-0 top-1 w-5 h-5 rounded-full border-4 border-surface-container-low ${i === 0 ? 'bg-primary-container' : 'bg-surface-container-highest'}`}></div>
-                        <p className="text-xs font-bold text-on-surface truncate pr-2">{commit.message}</p>
-                        <p className="text-[11px] text-on-surface-variant mt-1">Commited by {commit.authorName}</p>
-                        <span className={`text-[10px] font-medium ${i === 0 ? 'text-primary' : 'text-on-surface-variant'}`}>{new Date(commit.date).toLocaleDateString()}</span>
+                        <div className={`absolute left-0 top-1 h-5 w-5 rounded-full border-4 border-paper ${i === 0 ? "bg-accent" : "bg-frame"}`}></div>
+                        <p className="truncate pr-2 text-xs font-bold text-ink">{commit.message}</p>
+                        <p className="mt-1 text-[11px] text-muted">Committed by {commit.authorName}</p>
+                        <span className={`text-[10px] font-medium ${i === 0 ? "text-accent" : "text-muted"}`}>
+                          {new Date(commit.date).toLocaleDateString()}
+                        </span>
                       </div>
                     ))}
-                    {commits.length === 0 && <p className="text-xs text-on-surface-variant">No recent commits found.</p>}
+                    {commits.length === 0 && <p className="text-xs text-muted">No recent commits found.</p>}
                   </div>
                 </section>
               </div>
 
-              {/* RIGHT COLUMN */}
-              <div className="lg:col-span-8 space-y-8">
+              <div className="space-y-8 lg:col-span-8">
                 <AISummary repoData={data} />
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                   <LanguageBar languages={languages} />
                   <DependencySnapshot owner={owner} repo={repo} tree={fileTree} />
                 </div>
@@ -214,24 +258,27 @@ export default function ReportPage({ params }: { params: Promise<{ owner: string
         )}
 
         {activeTab === "activity" && (
-          <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Activity Timeline Detailed */}
-            <section className="bg-surface-container-low rounded-2xl p-6 border border-white/5">
-              <h2 className="text-xs font-black uppercase tracking-[0.2em] text-on-surface-variant flex items-center gap-2 mb-6">
-                <History className="text-primary w-5 h-5" />
+          <div className="mx-auto max-w-4xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <section className="panel-card rounded-[1.9rem] p-6">
+              <h2 className="mb-6 flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-muted">
+                <History className="h-5 w-5 text-accent" />
                 Recent Activity
               </h2>
-              <div className="space-y-6 relative">
-                <div className="absolute left-[9px] top-2 bottom-2 w-[2px] bg-surface-container-highest"></div>
+              <div className="relative space-y-6">
+                <div className="absolute bottom-2 left-[9px] top-2 w-[2px] bg-frame"></div>
                 {commits.slice(0, 20).map((commit, i) => (
                   <div key={commit.sha} className="relative pl-8">
-                    <div className={`absolute left-0 top-1 w-5 h-5 rounded-full border-4 border-surface-container-low ${i === 0 ? 'bg-primary-container' : 'bg-surface-container-highest'}`}></div>
-                    <p className="text-sm font-bold text-on-surface pr-2">{commit.message}</p>
-                    <p className="text-[11px] text-on-surface-variant mt-1">Commited by {commit.authorName} • {commit.sha.substring(0, 7)}</p>
-                    <span className={`text-[10px] font-medium ${i === 0 ? 'text-primary' : 'text-on-surface-variant'}`}>{new Date(commit.date).toLocaleDateString()}</span>
+                    <div className={`absolute left-0 top-1 h-5 w-5 rounded-full border-4 border-paper ${i === 0 ? "bg-accent" : "bg-frame"}`}></div>
+                    <p className="pr-2 text-sm font-bold text-ink">{commit.message}</p>
+                    <p className="mt-1 text-[11px] text-muted">
+                      Committed by {commit.authorName} · {commit.sha.substring(0, 7)}
+                    </p>
+                    <span className={`text-[10px] font-medium ${i === 0 ? "text-accent" : "text-muted"}`}>
+                      {new Date(commit.date).toLocaleDateString()}
+                    </span>
                   </div>
                 ))}
-                {commits.length === 0 && <p className="text-xs text-on-surface-variant">No recent commits found.</p>}
+                {commits.length === 0 && <p className="text-xs text-muted">No recent commits found.</p>}
               </div>
             </section>
           </div>
@@ -240,7 +287,7 @@ export default function ReportPage({ params }: { params: Promise<{ owner: string
         {activeTab === "insights" && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <AISummary repoData={data} />
-            <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <section className="grid grid-cols-1 gap-6 md:grid-cols-3">
               <PRIntelligence {...prIntel} />
               <MaintenanceScore score={maintScore} />
               <ContributionScore score={contScore} />

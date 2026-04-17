@@ -1,76 +1,65 @@
-// ─────────────────────────────────────────────
-// PRIntelligence.tsx
-// ─────────────────────────────────────────────
 import { Verified, Rocket, TrendingUp, Clock } from "lucide-react";
- 
+
 interface PRIntelligenceProps {
   verdict: string;
   mergeRate: number;
   avgMergeTimeDays: number;
   avgFirstReviewTimeDays: number;
 }
- 
+
 export function PRIntelligence({
   verdict,
   mergeRate,
   avgMergeTimeDays,
   avgFirstReviewTimeDays,
 }: PRIntelligenceProps) {
+  void avgFirstReviewTimeDays;
   const formattedMergeRate = (mergeRate * 100).toFixed(0);
   const formattedMergeTime =
-    avgMergeTimeDays === 0
-      ? "N/A"
-      : avgMergeTimeDays < 1
-      ? "< 24h"
-      : `${avgMergeTimeDays.toFixed(1)}d`;
- 
+    avgMergeTimeDays === 0 ? "N/A" : avgMergeTimeDays < 1 ? "< 24h" : `${avgMergeTimeDays.toFixed(1)}d`;
+
   const verdictMap: Record<string, string> = {
     Abandoned: "High Risk",
     "Great for contributions": "Welcoming",
     "Maintainer-only": "Closed",
   };
   const verdictShort = verdictMap[verdict] ?? "Optimized";
- 
+
   const verdictColor =
     verdictShort === "High Risk"
-      ? "text-red-400 bg-red-500/10 border-red-500/20"
+      ? "border-red-200 bg-red-50 text-red-600"
       : verdictShort === "Welcoming"
-      ? "text-green-400 bg-green-500/10 border-green-500/20"
-      : "text-primary bg-primary/10 border-primary/20";
- 
+        ? "border-green-200 bg-green-50 text-green-600"
+        : "border-accent/30 bg-accent/10 text-accent";
+
   return (
-    <div className="glass p-6 rounded-2xl border border-outline-variant/5 bg-gradient-to-br from-primary/8 to-transparent flex flex-col justify-between h-full relative">
-      <div className="flex justify-between items-start mb-5">
-        <h3 className="text-[10px] font-black tracking-[0.2em] uppercase text-on-surface-variant">
-          PR Intelligence
-        </h3>
-        <Verified className="w-4 h-4 text-primary shrink-0" />
+    <div className="metric-card relative flex h-full flex-col justify-between rounded-[1.75rem] p-6">
+      <div className="mb-5 flex items-start justify-between">
+        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted">PR Intelligence</h3>
+        <Verified className="h-4 w-4 shrink-0 text-accent" />
       </div>
- 
-      {/* Verdict badge */}
-      <div className={`self-start inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[11px] font-bold mb-5 ${verdictColor}`}>
-        <Rocket className="w-3.5 h-3.5" />
+
+      <div className={`mb-5 inline-flex self-start items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[11px] font-bold ${verdictColor}`}>
+        <Rocket className="h-3.5 w-3.5" />
         {verdictShort}
       </div>
- 
-      {/* Stats row */}
-      <div className="grid grid-cols-2 gap-3 mt-auto">
-        <div className="bg-surface-container-highest/60 rounded-xl p-3">
-          <div className="flex items-center gap-1 text-on-surface-variant mb-1">
-            <TrendingUp className="w-3 h-3" />
-            <span className="text-[10px] uppercase tracking-wider font-semibold">Merge rate</span>
+
+      <div className="mt-auto grid grid-cols-2 gap-3">
+        <div className="rounded-xl border border-frame bg-panel p-3">
+          <div className="mb-1 flex items-center gap-1 text-muted">
+            <TrendingUp className="h-3 w-3" />
+            <span className="text-[10px] font-semibold uppercase tracking-wider">Merge rate</span>
           </div>
-          <span className="text-xl font-black text-on-surface">{formattedMergeRate}%</span>
+          <span className="text-xl font-black text-ink">{formattedMergeRate}%</span>
         </div>
-        <div className="bg-surface-container-highest/60 rounded-xl p-3">
-          <div className="flex items-center gap-1 text-on-surface-variant mb-1">
-            <Clock className="w-3 h-3" />
-            <span className="text-[10px] uppercase tracking-wider font-semibold">Avg time</span>
+        <div className="rounded-xl border border-frame bg-panel p-3">
+          <div className="mb-1 flex items-center gap-1 text-muted">
+            <Clock className="h-3 w-3" />
+            <span className="text-[10px] font-semibold uppercase tracking-wider">Avg time</span>
           </div>
-          <span className="text-xl font-black text-on-surface">{formattedMergeTime}</span>
+          <span className="text-xl font-black text-ink">{formattedMergeTime}</span>
         </div>
       </div>
     </div>
   );
 }
- 

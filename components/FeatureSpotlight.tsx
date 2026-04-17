@@ -1,72 +1,65 @@
-// ─────────────────────────────────────────────
-// FeatureSpotlight.tsx
-// ─────────────────────────────────────────────
 export function FeatureSpotlight() {
   return (
-    <section className="max-w-7xl mx-auto px-6 mt-36">
-      <div className="flex flex-col md:flex-row items-center gap-16">
-        {/* Copy */}
-        <div className="flex-1 space-y-7">
-          <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-on-surface leading-tight">
-            Deep context.{" "}
-            <span className="text-on-surface-variant/35">Zero setup.</span>
+    <section className="mx-auto mt-32 max-w-7xl px-5 md:px-8">
+      <div className="grid items-center gap-12 lg:grid-cols-[0.95fr_1.05fr]">
+        <div className="space-y-7">
+          <div className="inline-flex rounded-full border border-frame bg-panel px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.25em] text-muted">
+            Designed for decisions
+          </div>
+          <h2 className="max-w-2xl font-display text-5xl leading-[0.98] tracking-[-0.04em] text-ink md:text-7xl">
+            Deep repository context without the dashboard clutter.
           </h2>
-          <p className="text-base text-on-surface-variant leading-relaxed font-light max-w-md">
-            RepoLens clones your repository in a secure ephemeral environment, runs an exhaustive
-            suite of static analyzers, and surfaces everything into a human-readable executive
-            report.
+          <p className="max-w-xl text-base leading-8 text-muted">
+            Instead of flooding you with graphs, RepoLens organizes GitHub data into a reading experience that helps you answer practical questions quickly: Is this repo alive, welcoming, and worth depending on?
           </p>
           <div className="grid grid-cols-2 gap-8 pt-2">
             <div>
-              <span className="text-4xl font-black text-primary tracking-tighter leading-none block mb-1">
-                0s
-              </span>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-outline">
-                Configuration needed
-              </p>
+              <span className="block font-display text-4xl leading-none text-ink">1 report</span>
+              <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-muted">One concise view</p>
             </div>
             <div>
-              <span className="text-4xl font-black text-primary tracking-tighter leading-none block mb-1">
-                150+
-              </span>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-outline">
-                Metrics tracked
+              <span className="block font-display text-4xl leading-none text-ink">4 signals</span>
+              <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-muted">
+                Health, PRs, maintainers, onboarding
               </p>
             </div>
           </div>
         </div>
 
-        {/* Code preview */}
-        <div className="flex-1 relative w-full max-w-lg">
-          <div className="relative z-10 p-7 backdrop-blur-md bg-surface-container-low/80 rounded-2xl border border-white/[0.08] shadow-[0_40px_80px_rgba(0,0,0,0.5)]">
-            {/* Window chrome */}
-            <div className="flex items-center gap-1.5 mb-5 pb-4 border-b border-white/[0.06]">
-              <span className="w-2.5 h-2.5 rounded-full bg-red-500/50"></span>
-              <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/50"></span>
-              <span className="w-2.5 h-2.5 rounded-full bg-green-500/50"></span>
-              <span className="ml-4 text-[11px] font-mono text-on-surface-variant/50">
-                analysis_report.json
-              </span>
+        <div className="panel-card relative overflow-hidden rounded-[2rem] p-6 md:p-8">
+          <div className="grid gap-4 md:grid-cols-[0.9fr_1.1fr]">
+            <div className="rounded-[1.6rem] border border-frame bg-ink p-6 text-paper">
+              <p className="text-[11px] uppercase tracking-[0.24em] text-paper/60">Repository memo</p>
+              <p className="mt-5 font-display text-4xl leading-tight">A cleaner answer to should we trust this project?</p>
+              <p className="mt-5 text-sm leading-7 text-paper/70">
+                Every section is written to support a real engineering decision, not just to show off metrics.
+              </p>
             </div>
-            <div className="space-y-3 font-mono text-xs">
-              {[
-                { line: "01", color: "text-blue-400", text: '"complexity_score": 0.82,' },
-                { line: "02", color: "text-green-400", text: '"maintainability": "High",' },
-                { line: "03", color: "text-blue-400", text: '"stale_branches": 14,' },
-                { line: "04", color: "text-red-400", text: '"security_hotspots": [3],' },
-                { line: "05", color: "text-blue-400", text: '"onboarding_difficulty": 2,' },
-              ].map(({ line, color, text }) => (
-                <div key={line} className="flex gap-4 items-start">
-                  <span className="text-on-surface-variant/30 select-none w-4 shrink-0 text-right">
-                    {line}
-                  </span>
-                  <span className={color}>{text}</span>
-                </div>
-              ))}
+            <div className="rounded-[1.6rem] border border-frame bg-canvas p-6">
+              <div className="mb-5 flex items-center gap-2 border-b border-frame pb-4">
+                <span className="h-2.5 w-2.5 rounded-full bg-accent"></span>
+                <span className="h-2.5 w-2.5 rounded-full bg-teal"></span>
+                <span className="h-2.5 w-2.5 rounded-full bg-ink"></span>
+                <span className="ml-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted">
+                  repository-notes.json
+                </span>
+              </div>
+              <div className="space-y-3 font-mono text-xs">
+                {[
+                  { line: "01", color: "text-[#8a5a44]", text: '"issue_response_hours": 17.4,' },
+                  { line: "02", color: "text-[#1ca9c9]", text: '"merge_rate": 0.71,' },
+                  { line: "03", color: "text-[#1f231c]", text: '"maintainer_activity": "high",' },
+                  { line: "04", color: "text-[#b84c3e]", text: '"good_first_issue_count": 9,' },
+                  { line: "05", color: "text-[#8a5a44]", text: '"health_summary": "active but selective"' },
+                ].map(({ line, color, text }) => (
+                  <div key={line} className="flex items-start gap-4">
+                    <span className="w-4 shrink-0 select-none text-right text-muted/50">{line}</span>
+                    <span className={color}>{text}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-          {/* Glow */}
-          <div className="absolute -top-10 -right-10 w-56 h-56 bg-primary/15 rounded-full blur-[80px] pointer-events-none -z-10"></div>
         </div>
       </div>
     </section>

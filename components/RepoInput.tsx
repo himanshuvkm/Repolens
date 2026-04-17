@@ -37,7 +37,7 @@ export function RepoInput() {
 
       navigate(parts[0], parts[1]);
     } catch {
-      setError("Enter a valid GitHub URL — e.g. https://github.com/vercel/next.js");
+      setError("Enter a valid GitHub URL, for example https://github.com/vercel/next.js");
     }
   };
 
@@ -48,15 +48,22 @@ export function RepoInput() {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-4">
-      <form onSubmit={handleAnalyze} id="analyzer" className="relative group scroll-mt-32">
-        {/* Glow */}
-        <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-primary-container/20 rounded-2xl blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+    <div className="mx-auto w-full max-w-5xl px-5 md:px-8">
+      <form onSubmit={handleAnalyze} id="analyzer" className="panel-card relative scroll-mt-32 overflow-hidden rounded-[2rem] p-4 md:p-5">
+        <div className="absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,#1ca9c9_0%,#dd8330_55%,#1f231c_100%)]" />
+        <div className="mb-4 flex items-center justify-between gap-4 px-2">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-muted">Analyze a repository</p>
+            <p className="mt-1 text-sm text-muted">Paste any public GitHub repository URL to generate the report.</p>
+          </div>
+          <div className="hidden rounded-full border border-frame bg-canvas px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted md:block">
+            Live GitHub fetch
+          </div>
+        </div>
 
-        <div className="relative flex flex-col sm:flex-row gap-2.5 p-2 bg-surface-container-low rounded-2xl ring-1 ring-white/[0.07] shadow-2xl">
-          {/* Input */}
-          <div className="flex flex-1 items-center px-4 gap-3 bg-surface-container-lowest rounded-xl min-w-0">
-            <Search className="w-4 h-4 text-outline shrink-0" />
+        <div className="relative flex flex-col gap-3 md:flex-row">
+          <div className="flex min-w-0 flex-1 items-center gap-3 rounded-[1.5rem] border border-frame bg-canvas px-5">
+            <Search className="h-4 w-4 shrink-0 text-muted" />
             <input
               type="url"
               value={url}
@@ -65,7 +72,7 @@ export function RepoInput() {
                 if (error) setError("");
               }}
               placeholder="https://github.com/facebook/react"
-              className="w-full py-3.5 bg-transparent border-none focus:ring-0 text-on-surface placeholder:text-on-surface-variant/40 text-sm outline-none min-w-0"
+              className="min-w-0 w-full bg-transparent py-4 text-sm text-ink outline-none placeholder:text-muted/70"
               autoComplete="off"
               spellCheck={false}
             />
@@ -73,42 +80,39 @@ export function RepoInput() {
               <button
                 type="button"
                 onClick={() => setUrl("")}
-                className="shrink-0 text-on-surface-variant/40 hover:text-on-surface-variant text-sm font-medium transition-colors"
+                className="shrink-0 text-sm font-medium text-muted transition-colors hover:text-ink"
                 aria-label="Clear input"
               >
-                ✕
+                x
               </button>
             )}
           </div>
 
-          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
-            className="flex items-center justify-center gap-2 bg-gradient-to-r from-primary-container to-primary text-on-primary-container px-7 py-3.5 rounded-xl font-bold text-sm transition-all active:scale-[0.97] shadow-lg shadow-primary/20 whitespace-nowrap disabled:opacity-60 disabled:cursor-not-allowed"
+            className="flex items-center justify-center gap-2 rounded-[1.5rem] bg-ink px-8 py-4 text-sm font-semibold uppercase tracking-[0.18em] text-paper transition hover:-translate-y-0.5 hover:bg-[#11140e] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <>
                 Analyze
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="h-4 w-4" />
               </>
             )}
           </button>
         </div>
       </form>
 
-      {/* Error */}
       {error && (
-        <p className="text-error mt-3 text-center text-xs font-medium animate-in fade-in slide-in-from-top-2">
+        <p className="mt-3 text-center text-xs font-medium text-error animate-in fade-in slide-in-from-top-2">
           {error}
         </p>
       )}
 
-      {/* Example chips */}
-      <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3 flex-wrap">
-        <span className="text-[10px] uppercase tracking-[0.2em] text-on-surface-variant/50">Try:</span>
+      <div className="mt-7 flex flex-col flex-wrap items-center justify-center gap-3 sm:flex-row">
+        <span className="text-[10px] uppercase tracking-[0.2em] text-muted">Popular:</span>
         <div className="flex flex-wrap justify-center gap-2">
           {exampleRepos.map((repo) => (
             <button
@@ -116,9 +120,9 @@ export function RepoInput() {
               type="button"
               onClick={() => handleChipClick(repo)}
               disabled={loading}
-              className="px-3.5 py-1.5 rounded-full bg-surface-container-low border border-outline-variant/10 text-xs font-medium text-on-surface-variant hover:bg-surface-container-high hover:text-primary hover:border-primary/20 transition-all flex items-center gap-1.5 disabled:opacity-50"
+              className="flex items-center gap-1.5 rounded-full border border-frame bg-panel px-4 py-2 text-xs font-medium text-muted transition-all hover:-translate-y-0.5 hover:border-ink hover:text-ink disabled:opacity-50"
             >
-              <Github className="w-3.5 h-3.5" />
+              <Github className="h-3.5 w-3.5" />
               {repo}
             </button>
           ))}

@@ -1,0 +1,251 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AnalysisStatus {
+  queued
+  processing
+  completed
+  failed
+}
+
+enum IssueState {
+  open
+  closed
+}
+
+enum PullRequestState {
+  open
+  closed
+}
+
+model Repository {
+  id                String                   @id @default(cuid())
+  owner             String
+  name              String
+  fullName          String                   @unique
+  description       String?
+  defaultBranch     String?
+  primaryLanguage   String?
+  stars             Int                      @default(0)
+  forks             Int                      @default(0)
+  watchers          Int                      @default(0)
+  openIssuesCount   Int                      @default(0)
+  goodFirstIssueCount Int                    @default(0)
+  topics            String[]
+  archived          Boolean                  @default(false)
+  disabled          Boolean                  @default(false)
+  createdAt         DateTime
+  updatedAt         DateTime
+  pushedAt          DateTime?
+  lastSyncedAt      DateTime?
+  contributors      RepositoryContributor[]
+  issues            Issue[]
+  pullRequests      PullRequest[]
+  analysisRuns      AnalysisRun[]
+  metricSnapshots   RepositoryMetricSnapshot[]
+  insightSnapshots  InsightSnapshot[]
+  webhookDeliveries WebhookDelivery[]
+
+  @@index([owner, name])
+}
+
+model Contributor {
+  id               String                  @id @default(cuid())
+  githubId         BigInt                  @unique
+  login            String                  @unique
+  avatarUrl        String?
+  type             String?
+  siteAdmin        Boolean                 @default(false)
+  contributions    RepositoryContributor[]
+  authoredIssues   Issue[]                 @relation("IssueAuthor")
+  authoredPulls    PullRequest[]           @relation("PullRequestAuthor")
+  issueComments    IssueComment[]
+  pullRequestReviews PullRequestReview[]
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+}
+
+model RepositoryContributor {
+  id              String      @id @default(cuid())
+  repositoryId    String
+  contributorId   String
+  contributions   Int         @default(0)
+  isMaintainer    Boolean     @default(false)
+  repository      Repository  @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  contributor     Contributor @relation(fields: [contributorId], references: [id], onDelete: Cascade)
+
+  @@unique([repositoryId, contributorId])
+}
+
+model Issue {
+  id                    String         @id @default(cuid())
+  githubId              BigInt         @unique
+  repositoryId          String
+  authorId              String?
+  number                Int
+  title                 String
+  state                 IssueState
+  isPullRequest         Boolean        @default(false)
+  authorAssociation     String?
+  createdAt             DateTime
+  updatedAt             DateTime
+  closedAt              DateTime?
+  firstMaintainerResponseAt DateTime?
+  labels                IssueLabel[]
+  comments              IssueComment[]
+  repository            Repository     @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  author                Contributor?   @relation("IssueAuthor", fields: [authorId], references: [id])
+
+  @@unique([repositoryId, number])
+  @@index([repositoryId, state])
+}
+
+model IssueLabel {
+  id        String  @id @default(cuid())
+  issueId    String
+  name       String
+  issue      Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
+
+  @@index([issueId])
+}
+
+model IssueComment {
+  id                String       @id @default(cuid())
+  githubId          BigInt       @unique
+  issueId           String
+  authorId          String?
+  authorAssociation String?
+  body              String?
+  createdAt         DateTime
+  updatedAt         DateTime
+  issue             Issue        @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  author            Contributor? @relation(fields: [authorId], references: [id])
+
+  @@index([issueId, createdAt])
+}
+
+model PullRequest {
+  id                String              @id @default(cuid())
+  githubId          BigInt              @unique
+  repositoryId      String
+  authorId          String?
+  number            Int
+  title             String
+  state             PullRequestState
+  draft             Boolean             @default(false)
+  authorAssociation String?
+  additions         Int                 @default(0)
+  deletions         Int                 @default(0)
+  changedFiles      Int                 @default(0)
+  commits           Int                 @default(0)
+  createdAt         DateTime
+  updatedAt         DateTime
+  closedAt          DateTime?
+  mergedAt          DateTime?
+  labels            PullRequestLabel[]
+  reviews           PullRequestReview[]
+  repository        Repository          @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  author            Contributor?        @relation("PullRequestAuthor", fields: [authorId], references: [id])
+
+  @@unique([repositoryId, number])
+  @@index([repositoryId, state])
+}
+
+model PullRequestLabel {
+  id            String      @id @default(cuid())
+  pullRequestId String
+  name          String
+  pullRequest   PullRequest @relation(fields: [pullRequestId], references: [id], onDelete: Cascade)
+
+  @@index([pullRequestId])
+}
+
+model PullRequestReview {
+  id            String       @id @default(cuid())
+  githubId      BigInt       @unique
+  pullRequestId String
+  reviewerId    String?
+  state         String?
+  submittedAt   DateTime?
+  pullRequest   PullRequest  @relation(fields: [pullRequestId], references: [id], onDelete: Cascade)
+  reviewer      Contributor? @relation(fields: [reviewerId], references: [id])
+
+  @@index([pullRequestId, submittedAt])
+}
+
+model AnalysisRun {
+  id                  String                @id @default(cuid())
+  repositoryId        String
+  status              AnalysisStatus        @default(queued)
+  trigger             String
+  errorMessage        String?
+  startedAt           DateTime?
+  completedAt         DateTime?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  metricSnapshotId    String?
+  insightSnapshotId   String?
+  repository          Repository            @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  metricSnapshot      RepositoryMetricSnapshot? @relation(fields: [metricSnapshotId], references: [id])
+  insightSnapshot     InsightSnapshot?      @relation(fields: [insightSnapshotId], references: [id])
+
+  @@index([repositoryId, createdAt])
+  @@index([status])
+}
+
+model RepositoryMetricSnapshot {
+  id                           String      @id @default(cuid())
+  repositoryId                 String
+  averageIssueResponseHours    Float
+  pullRequestMergeRate         Float
+  maintainerActivityScore      Float
+  beginnerFriendlinessScore    Float
+  healthScore                  Int
+  healthSummary                String
+  prSuccessProbability         Float?
+  openIssueCount               Int
+  closedIssueCount             Int
+  openPullRequestCount         Int
+  mergedPullRequestCount       Int
+  activeMaintainerCount        Int
+  totalContributorCount        Int
+  goodFirstIssueCount          Int
+  scoreBreakdown               Json
+  generatedAt                  DateTime    @default(now())
+  repository                   Repository  @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  analysisRuns                 AnalysisRun[]
+
+  @@index([repositoryId, generatedAt])
+}
+
+model InsightSnapshot {
+  id            String      @id @default(cuid())
+  repositoryId  String
+  provider      String
+  promptVersion String
+  content       String
+  generatedAt   DateTime    @default(now())
+  repository    Repository  @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  analysisRuns  AnalysisRun[]
+
+  @@index([repositoryId, generatedAt])
+}
+
+model WebhookDelivery {
+  id           String      @id @default(cuid())
+  repositoryId String?
+  event        String
+  deliveryId   String      @unique
+  signature    String?
+  payload      Json
+  processedAt  DateTime?
+  createdAt    DateTime    @default(now())
+  repository   Repository? @relation(fields: [repositoryId], references: [id], onDelete: SetNull)
+
+  @@index([repositoryId, createdAt])
+}

@@ -19,9 +19,9 @@ export function DependencySnapshot({ owner, repo, tree }: Props) {
   useEffect(() => {
     const checkDeps = async () => {
       setLoading(true);
-      
-      const hasPackageJson = tree.some(f => f.path === "package.json");
-      const hasRequirementsText = tree.some(f => f.path === "requirements.txt");
+
+      const hasPackageJson = tree.some((f) => f.path === "package.json");
+      const hasRequirementsText = tree.some((f) => f.path === "requirements.txt");
 
       if (hasPackageJson) {
         setType("npm");
@@ -31,8 +31,7 @@ export function DependencySnapshot({ owner, repo, tree }: Props) {
             const data = await res.json();
             const count = Object.keys(data.dependencies || {}).length + Object.keys(data.devDependencies || {}).length;
             setDepsCount(count);
-            
-            // Dummy naive check for outdated - if Next.js < 13 is found for instance, just an example!
+
             const depsStr = JSON.stringify(data);
             if (depsStr.includes('"react": "^16') || depsStr.includes('"next": "^12') || depsStr.includes('"express": "^3')) {
               setHasOutdated(true);
@@ -47,66 +46,64 @@ export function DependencySnapshot({ owner, repo, tree }: Props) {
           const res = await fetch(`https://raw.githubusercontent.com/${owner}/${repo}/HEAD/requirements.txt`);
           if (res.ok) {
             const text = await res.text();
-            const count = text.split('\n').filter(line => line.trim() && !line.startsWith('#')).length;
+            const count = text.split("\n").filter((line) => line.trim() && !line.startsWith("#")).length;
             setDepsCount(count);
           }
         } catch {
           // ignore
         }
       }
-      
+
       setLoading(false);
     };
 
-    checkDeps();
+    void checkDeps();
   }, [owner, repo, tree]);
 
   if (loading) {
     return (
-      <section className="bg-surface-container-highest rounded-2xl p-6 border border-outline-variant/5 animate-pulse flex flex-col justify-center h-full">
-        <div className="h-4 w-32 bg-surface-variant rounded mb-6"></div>
-        <div className="h-8 w-16 bg-surface-variant rounded mb-4"></div>
-        <div className="h-4 w-24 bg-surface-variant/50 rounded"></div>
+      <section className="panel-card flex h-full animate-pulse flex-col justify-center rounded-[1.9rem] p-6">
+        <div className="mb-6 h-4 w-32 rounded bg-frame"></div>
+        <div className="mb-4 h-8 w-16 rounded bg-frame"></div>
+        <div className="h-4 w-24 rounded bg-frame/70"></div>
       </section>
     );
   }
 
   if (type === "none" || depsCount === null) {
     return (
-      <section className="bg-surface-container-highest rounded-2xl p-6 border border-outline-variant/5 flex flex-col justify-between h-full opacity-50">
-        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-on-surface-variant flex items-center gap-2 mb-2">
-          <Layers className="text-primary w-5 h-5" />
+      <section className="panel-card flex h-full flex-col justify-between rounded-[1.9rem] p-6 opacity-70">
+        <h2 className="mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-muted">
+          <Layers className="h-5 w-5 text-accent" />
           Dependencies
         </h2>
-        <div className="mt-4 flex items-center gap-2 text-on-surface-variant">
-          <span className="font-medium text-sm">No standard dependencies found</span>
+        <div className="mt-4 flex items-center gap-2 text-muted">
+          <span className="text-sm font-medium">No standard dependencies found</span>
         </div>
       </section>
     );
   }
 
   return (
-    <section className="bg-surface-container-highest rounded-2xl p-6 border border-outline-variant/5 flex flex-col justify-between h-full">
-      <h2 className="text-xs font-black uppercase tracking-[0.2em] text-on-surface-variant flex items-center gap-2 mb-2">
-        <Layers className="text-primary w-5 h-5" />
+    <section className="panel-card flex h-full flex-col justify-between rounded-[1.9rem] p-6">
+      <h2 className="mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-muted">
+        <Layers className="h-5 w-5 text-accent" />
         Dependencies
       </h2>
       <div className="mt-4">
-        <div className="flex items-end gap-2 mb-3">
-          <span className="text-4xl font-black text-on-surface">{depsCount}</span>
-          <span className="text-sm text-on-surface-variant mb-1 font-medium pb-0.5">
-            {type === 'npm' ? 'NPM Packages' : 'Python Packages'}
-          </span>
+        <div className="mb-3 flex items-end gap-2">
+          <span className="text-4xl font-black text-ink">{depsCount}</span>
+          <span className="mb-1 pb-0.5 text-sm font-medium text-muted">{type === "npm" ? "NPM Packages" : "Python Packages"}</span>
         </div>
-        
+
         {hasOutdated ? (
-          <div className="bg-orange-500/10 text-orange-400 text-xs px-3 py-1.5 rounded-lg border border-orange-500/20 inline-flex items-center gap-1.5 font-bold">
-            <AlertTriangle className="w-4 h-4" />
+          <div className="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 bg-orange-50 px-3 py-1.5 text-xs font-bold text-orange-500">
+            <AlertTriangle className="h-4 w-4" />
             Updates needed
           </div>
         ) : (
-          <div className="bg-green-500/10 text-green-400 text-xs px-3 py-1.5 rounded-lg border border-green-500/20 inline-flex items-center gap-1.5 font-bold">
-            <CheckCircle2 className="w-4 h-4" />
+          <div className="inline-flex items-center gap-1.5 rounded-lg border border-green-200 bg-green-50 px-3 py-1.5 text-xs font-bold text-green-600">
+            <CheckCircle2 className="h-4 w-4" />
             All packages secure
           </div>
         )}
